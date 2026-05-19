@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Déclaration Copilot"
+version = "1.0.0"
+id = "artifacts/declaration-copilot"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20563
+
+[services.development]
+run = "pnpm --filter @workspace/declaration-copilot run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/declaration-copilot", "run", "build" ]
+publicDir = "artifacts/declaration-copilot/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20563"
+BASE_PATH = "/"
