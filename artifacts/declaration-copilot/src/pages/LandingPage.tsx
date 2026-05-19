@@ -36,15 +36,19 @@ function LiveClock() {
 
 function HoverRollText({ text }: { text: string }) {
   return (
-    <span className="relative overflow-hidden flex flex-col h-[20px] transition-transform duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:-translate-y-1/2">
-      <span className="h-[20px] flex items-center leading-none">{text}</span>
-      <span className="h-[20px] flex items-center leading-none">{text}</span>
+    <span className="relative overflow-hidden h-[20px] flex items-center">
+      <span className="flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:-translate-y-1/2">
+        <span className="h-[20px] flex items-center leading-none">{text}</span>
+        <span className="h-[20px] flex items-center leading-none">{text}</span>
+      </span>
     </span>
   );
 }
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [demoConfirmed, setDemoConfirmed] = useState(false);
+  const [accessConfirmed, setAccessConfirmed] = useState(false);
 
   return (
     <div className="w-full bg-[#F4F3EF] min-h-screen text-[#1C1A16] font-sans selection:bg-[#1A6B5E] selection:text-white">
@@ -83,12 +87,19 @@ export default function LandingPage() {
                 <Clock className="w-3.5 h-3.5 text-gray-600" />
                 <LiveClock />
               </div>
-              <button className="group bg-[#141210] text-white text-[13px] font-medium rounded-full pl-5 pr-2 py-2 flex items-center gap-3 hover:bg-black transition-colors" data-testid="btn-demo-nav">
-                <HoverRollText text="Demander une démo" />
-                <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                  <ArrowRight className="w-3.5 h-3.5 text-[#141210] transition-transform duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:-rotate-45" />
-                </div>
-              </button>
+              {demoConfirmed ? (
+                <span className="text-[13px] text-[#1A6B5E] font-medium px-4 py-2 bg-[#1A6B5E]/8 rounded-full flex items-center gap-2" data-testid="btn-demo-nav-confirmed">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Merci — nous vous contacterons sous 24h.
+                </span>
+              ) : (
+                <button onClick={() => setDemoConfirmed(true)} className="group bg-[#141210] text-white text-[13px] font-medium rounded-full pl-5 pr-2 py-2 flex items-center gap-3 hover:bg-black transition-colors" data-testid="btn-demo-nav">
+                  <HoverRollText text="Demander une démo" />
+                  <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                    <ArrowRight className="w-3.5 h-3.5 text-[#141210] transition-transform duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:-rotate-45" />
+                  </div>
+                </button>
+              )}
             </div>
 
             <button 
@@ -517,12 +528,19 @@ export default function LandingPage() {
           <p className="text-[16px] text-white/70 mb-8 max-w-lg">
             Importez votre première facture. Résultat en 30 secondes.
           </p>
-          <button className="group bg-white text-[#1A6B5E] text-[14px] font-medium rounded-full pl-6 pr-2 py-2.5 flex items-center gap-3 hover:bg-gray-50 transition-colors" data-testid="btn-cta-footer">
-            <HoverRollText text="Demander l'accès anticipé" />
-            <div className="w-8 h-8 bg-[#1A6B5E]/10 rounded-full flex items-center justify-center">
-              <ArrowRight className="w-4 h-4 text-[#1A6B5E] transition-transform duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:-rotate-45" />
-            </div>
-          </button>
+          {accessConfirmed ? (
+            <span className="text-[14px] text-[#1A6B5E] font-medium px-6 py-3 bg-white rounded-full flex items-center gap-2" data-testid="btn-cta-footer-confirmed">
+              <CheckCircle2 className="w-4 h-4" />
+              Merci — nous vous contacterons sous 24h.
+            </span>
+          ) : (
+            <button onClick={() => setAccessConfirmed(true)} className="group bg-white text-[#1A6B5E] text-[14px] font-medium rounded-full pl-6 pr-2 py-2.5 flex items-center gap-3 hover:bg-gray-50 transition-colors" data-testid="btn-cta-footer">
+              <HoverRollText text="Demander l'accès anticipé" />
+              <div className="w-8 h-8 bg-[#1A6B5E]/10 rounded-full flex items-center justify-center">
+                <ArrowRight className="w-4 h-4 text-[#1A6B5E] transition-transform duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:-rotate-45" />
+              </div>
+            </button>
+          )}
           <p className="mt-6 text-white/50 text-[12px] font-medium tracking-wide max-w-md">
             Fiscalité algérienne 2025 · IFU · IRG · IBS · TVA · G50 · Sans carte bancaire
           </p>
