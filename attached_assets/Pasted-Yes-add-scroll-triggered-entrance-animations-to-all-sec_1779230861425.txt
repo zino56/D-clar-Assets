@@ -1,0 +1,135 @@
+Yes — add scroll-triggered entrance animations to all sections. 
+
+Use Framer Motion's `whileInView` + `viewport` — it's already in the project via `framer-motion`. 
+DO NOT install any new packages.
+
+---
+
+### 1. Create a reusable `FadeIn` wrapper component
+
+Create `src/components/FadeIn.tsx`:
+
+```tsx
+import { motion } from 'framer-motion';
+import { ReactNode } from 'react';
+
+interface FadeInProps {
+  children: ReactNode;
+  delay?: number;
+  direction?: 'up' | 'down' | 'left' | 'right' | 'none';
+  distance?: number;
+  className?: string;
+}
+
+export function FadeIn({
+  children,
+  delay = 0,
+  direction = 'up',
+  distance = 28,
+  className,
+}: FadeInProps) {
+  const directionMap = {
+    up:    { y: distance },
+    down:  { y: -distance },
+    left:  { x: distance },
+    right: { x: -distance },
+    none:  {},
+  };
+
+  return (
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, ...directionMap[direction] }}
+      whileInView={{ opacity: 1, x: 0, y: 0 }}
+      viewport={{ once: true, margin: '-80px' }}
+      transition={{
+        duration: 0.65,
+        delay,
+        ease: [0.25, 0.1, 0.25, 1],
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+```
+
+---
+
+### 2. Apply `FadeIn` to each section — stagger rules below
+
+**HERO section** — do NOT animate. The hero is above the fold and plays immediately 
+on load. Leave it as-is.
+
+**SECTION 2 — "What It Does" (bg-white)**
+- Badge row → `<FadeIn delay={0}>`
+- Heading h2 → `<FadeIn delay={0.1}>`
+- Desktop grid: left column → `<FadeIn delay={0.15} direction="left">`, 
+  center → `<FadeIn delay={0.2}>`, right → `<FadeIn delay={0.25} direction="right">`
+- Mobile/tablet content → `<FadeIn delay={0.15}>`
+
+**SECTION 3 — "What Hermes Does" (bg-[#F4F3EF])**
+- Badge row → `<FadeIn delay={0}>`
+- Heading h2 → `<FadeIn delay={0.1}>`
+- Card 1 (Hermes) → `<FadeIn delay={0.15} direction="left">`
+- Card 2 (Python) → `<FadeIn delay={0.25} direction="right">`
+
+**SECTION 4 — "Anomaly Detection" (bg-white)**
+- Badge row → `<FadeIn delay={0}>`
+- Heading h2 → `<FadeIn delay={0.1}>`
+- Anomaly grid: wrap the entire grid in `<FadeIn delay={0.15}>`
+  AND additionally wrap each individual anomaly card in 
+  `<FadeIn delay={i * 0.07}>` where i is the card index (0–5).
+  This creates a staggered cascade — each card fades in 70ms after the previous.
+- Teal "Voir les 11 anomalies" link → `<FadeIn delay={0.55}>`
+
+**SECTION 5 — "Bilingual Messages" (bg-[#F4F3EF])**
+- Badge row → `<FadeIn delay={0}>`
+- Heading h2 → `<FadeIn delay={0.1}>`
+- FR card → `<FadeIn delay={0.15} direction="left">`
+- AR card → `<FadeIn delay={0.3} direction="right">`
+
+**SECTION 6 — "Deployment & Scale" (bg-[#141210])**
+- Badge row → `<FadeIn delay={0}>`
+- Heading h2 → `<FadeIn delay={0.1}>`
+- Stat card 1 → `<FadeIn delay={0.15}>`
+- Stat card 2 → `<FadeIn delay={0.25}>`
+- Stat card 3 → `<FadeIn delay={0.35}>`
+
+**SECTION 7 — CTA Footer (bg-[#1A6B5E])**
+- Heading → `<FadeIn delay={0} direction="none">`
+- Sub text → `<FadeIn delay={0.1} direction="none">`
+- CTA button → `<FadeIn delay={0.2} direction="up">`
+- Trust line → `<FadeIn delay={0.3} direction="none">`
+
+---
+
+### 3. `prefers-reduced-motion` compliance
+
+In `FadeIn.tsx`, add this check before the motion.div so users who have 
+reduced motion enabled get no animation at all:
+
+```tsx
+import { useReducedMotion } from 'framer-motion';
+
+// inside the component:
+const shouldReduce = useReducedMotion();
+
+// if reduced motion, render as plain div:
+if (shouldReduce) {
+  return <div className={className}>{children}</div>;
+}
+```
+
+---
+
+### 4. Rules to NOT break
+
+- Do NOT animate the hero shader background or navbar.
+- Do NOT wrap entire `<section>` elements — wrap only the specific children 
+  (badge, heading, cards, etc.) to avoid layout shifts.
+- `viewport={{ once: true }}` — animations play once only, no re-trigger on scroll up.
+- Keep all existing hover animations (text-roll, arrow rotate, button hover) exactly as-is. 
+  FadeIn only controls entrance, not hover state.
+- The pulsing dot (`animate-pulse`) stays on its element — don't wrap it with FadeIn.
+- All existing Tailwind classes stay. FadeIn only adds opacity/transform, nothing else.
