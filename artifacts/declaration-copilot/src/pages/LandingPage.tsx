@@ -3,6 +3,8 @@ import { Link } from "wouter";
 import { Clock, ArrowRight, Menu, X, ShieldCheck, FileUp, Cpu, CheckCircle2, FileText, Brain, Calculator } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/FadeIn";
+import { SectionCounter } from "../components/SectionCounter";
+import { useActiveSection } from "../hooks/useActiveSection";
 
 // Safe import for shaders — all must be inside a <Shader> root component
 const ShaderRoot = lazy(() => import("shaders/react").then(m => ({ default: m.Shader })).catch(() => ({ default: ({ children }: { children: React.ReactNode }) => <>{children}</> })));
@@ -59,12 +61,13 @@ export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [demoConfirmed, setDemoConfirmed] = useState(false);
   const [accessConfirmed, setAccessConfirmed] = useState(false);
+  const { activeSection, totalSections } = useActiveSection();
 
   return (
     <div className="w-full bg-[#F4F3EF] min-h-screen text-[#1C1A16] font-sans selection:bg-[#1A6B5E] selection:text-white">
 
       {/* ─── SECTION 1: HERO — no entrance animations (above fold) ─── */}
-      <section className="relative w-full min-h-[100dvh] flex flex-col overflow-hidden">
+      <section id="hero" className="relative w-full min-h-[100dvh] flex flex-col overflow-hidden">
         {/* Shaders Background */}
         <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
           <Suspense fallback={null}>
@@ -98,6 +101,7 @@ export default function LandingPage() {
                 <Clock className="w-3.5 h-3.5 text-gray-600" />
                 <LiveClock />
               </div>
+              <SectionCounter activeSection={activeSection} totalSections={totalSections} />
               {demoConfirmed ? (
                 <span className="text-[13px] text-[#1A6B5E] font-medium px-4 py-2 bg-[#1A6B5E]/8 rounded-full flex items-center gap-2" data-testid="btn-demo-nav-confirmed">
                   <CheckCircle2 className="w-4 h-4" />
@@ -191,7 +195,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── SECTION 2: WHAT IT DOES ─── */}
-      <section className="bg-white py-16 sm:py-20 lg:py-32 w-full">
+      <section id="what-it-does" className="bg-white py-16 sm:py-20 lg:py-32 w-full">
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12">
 
           <FadeIn delay={0}>
@@ -330,7 +334,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── SECTION 3: WHAT HERMES DOES ─── */}
-      <section className="bg-[#F4F3EF] py-16 sm:py-20 lg:py-28 w-full">
+      <section id="ai-role" className="bg-[#F4F3EF] py-16 sm:py-20 lg:py-28 w-full">
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12">
 
           <FadeIn delay={0}>
@@ -389,7 +393,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── SECTION 4: ANOMALY DETECTION ─── */}
-      <section className="bg-white py-16 sm:py-20 lg:py-28 w-full">
+      <section id="anomaly-detection" className="bg-white py-16 sm:py-20 lg:py-28 w-full">
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12">
 
           <FadeIn delay={0}>
@@ -428,7 +432,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── SECTION 5: BILINGUAL MESSAGES ─── */}
-      <section className="bg-[#F4F3EF] py-16 sm:py-20 lg:py-24 w-full">
+      <section id="bilingual-messages" className="bg-[#F4F3EF] py-16 sm:py-20 lg:py-24 w-full">
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12">
 
           <FadeIn delay={0}>
@@ -493,7 +497,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── SECTION 6: DEPLOYMENT & SCALE ─── */}
-      <section className="bg-[#141210] py-16 sm:py-20 lg:py-24 w-full">
+      <section id="deployment-scale" className="bg-[#141210] py-16 sm:py-20 lg:py-24 w-full">
         <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-12">
 
           <FadeIn delay={0}>
@@ -541,7 +545,7 @@ export default function LandingPage() {
       </section>
 
       {/* ─── SECTION 7: CTA FOOTER ─── */}
-      <footer className="bg-[#1A6B5E] py-16 sm:py-20 lg:py-24 w-full text-center px-5 sm:px-8 lg:px-12">
+      <footer id="cta-footer" className="bg-[#1A6B5E] py-16 sm:py-20 lg:py-24 w-full text-center px-5 sm:px-8 lg:px-12">
         <div className="max-w-3xl mx-auto flex flex-col items-center">
           <FadeIn delay={0} direction="none">
             <h2 className="text-[clamp(1.75rem,4vw,3rem)] font-medium text-white mb-4 leading-tight tracking-[-0.02em]">

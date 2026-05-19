@@ -1,0 +1,229 @@
+Yes — add an animated section counter in the navbar that highlights which section (1–7) is currently in view while scrolling.
+
+Use the native Intersection Observer API in React with a reusable hook. Do NOT install any new package.
+
+IMPORTANT:
+- The counter should be subtle and premium, not loud.
+- Desktop only (hidden below md).
+- It should live on the RIGHT side of the navbar, between the Algiers time and the main CTA button.
+- Format: `01 / 07`, where the left number updates to the active section.
+- Animate the left number change with a vertical slide/fade using Framer Motion.
+- Do NOT change the existing nav links, CTA, shader, or section layouts.
+
+---
+
+### 1. Add IDs to the 7 sections in page order
+
+Use these exact ids:
+
+1. hero
+2. what-it-does
+3. ai-role
+4. anomaly-detection
+5. bilingual-messages
+6. deployment-scale
+7. cta-footer
+
+The hero already counts as section 1.
+
+---
+
+### 2. Create a reusable hook: `src/hooks/useActiveSection.ts`
+
+```tsx
+import { useEffect, useState } from 'react';
+
+const SECTION_IDS = [
+  'hero',
+  'what-it-does',
+  'ai-role',
+  'anomaly-detection',
+  'bilingual-messages',
+  'deployment-scale',
+  'cta-footer',
+];
+
+export function useActiveSection() {
+  const [activeSection, setActiveSection] = useState(0);
+
+  useEffect(() => {
+    const elements = SECTION_IDS
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
+
+    if (!elements.length) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntries = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+        if (visibleEntries.length > 0) {
+          const topEntry = visibleEntries;
+          const id = topEntry.target.id;
+          const index = SECTION_IDS.indexOf(id);
+          if (index !== -1) setActiveSection(index);
+        }
+      },
+      {
+        root: null,
+        rootMargin: '-20% 0px -45% 0px',
+        threshold: [0.15, 0.3, 0.45, 0.6, 0.75],
+      }
+    );
+
+    elements.forEach((element) => observer.observe(element));
+
+    return () => observer.disconnect();
+  }, []);
+
+  return {
+    activeSection,
+    totalSections: SECTION_IDS.length,
+  };
+}
+```
+
+---
+
+### 3. Create `src/components/SectionCounter.tsx`
+
+```tsx
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+
+interface SectionCounterProps {
+  activeSection: number;
+  totalSections: number;
+}
+
+function formatNumber(value: number) {
+  return String(value).padStart(2, '0');
+}
+
+export function SectionCounter({
+  activeSection,
+  totalSections,
+}: SectionCounterProps) {
+  const shouldReduce = useReducedMotion();
+  const displayNumber = formatNumber(activeSection + 1);
+  const totalNumber = formatNumber(totalSections);
+
+  return (
+    <div
+      aria-label={`Section ${activeSection + 1} sur ${totalSections}`}
+      className="hidden md:flex items-center rounded-full border border-black/10 bg-white/70 backdrop-blur-sm px-3 py-2"
+    >
+      <div className="relative h-[18px] w-[24px] overflow-hidden text-right tabular-nums">
+        {shouldReduce ? (
+          <span className="block text-[13px] font-medium text-[#1C1A16]">
+            {displayNumber}
+          </span>
+        ) : (
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={displayNumber}
+              initial={{ y: 14, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -14, opacity: 0 }}
+              transition={{ duration: 0.28, ease: [0.25, 0.1, 0.25, 1] }}
+              className="absolute inset-0 block text-[13px] font-medium text-[#1C1A16]"
+            >
+              {displayNumber}
+            </motion.span>
+          </AnimatePresence>
+        )}
+      </div>
+
+      <span className="mx-1.5 text-[13px] text-[#6B6966] tabular-nums">
+        /
+      </span>
+
+      <span className="text-[13px] text-[#6B6966] tabular-nums">
+        {totalNumber}
+      </span>
+    </div>
+  );
+}
+```
+
+---
+
+### 4. Wire it into the navbar component
+
+In the navbar component:
+
+- import `useActiveSection`
+- import `SectionCounter`
+- call the hook near the top of the component:
+
+```tsx
+const { activeSection, totalSections } = useActiveSection();
+```
+
+Insert the counter on desktop only in the right-side cluster:
+- existing text "Disponible pour comptables algériens"
+- existing clock/time
+- NEW `<SectionCounter activeSection={activeSection} totalSections={totalSections} />`
+- existing CTA button
+
+Example placement:
+
+```tsx
+<div className="hidden md:flex items-center gap-3 lg:gap-4">
+  <span className="hidden lg:block text-[13px] text-gray-500">
+    Disponible pour comptables algériens
+  </span>
+
+  <div className="flex items-center gap-1.5 text-[13px] text-gray-600">
+    <Clock size={14} />
+    <span>{timeString} à Alger</span>
+  </div>
+
+  <SectionCounter
+    activeSection={activeSection}
+    totalSections={totalSections}
+  />
+
+  {/* existing CTA button */}
+</div>
+```
+
+---
+
+### 5. Behavior rules
+
+- Desktop only: `hidden md:flex`
+- The active section should update based on whichever section has the highest visible intersection ratio.
+- The `rootMargin: '-20% 0px -45% 0px'` is intentional. Keep it exactly like this:
+  - top -20% makes the next section eligible slightly before fully reaching top
+  - bottom -45% reduces premature switching on tall sections
+- Use `tabular-nums` so `01`, `02`, `03` don’t jitter horizontally.
+- Do NOT make the whole counter teal. Keep it neutral:
+  - current number: `#1C1A16`
+  - slash + total: `#6B6966`
+  - background: `bg-white/70 backdrop-blur-sm`
+- Do NOT animate on every scroll pixel. The number changes only when the active section changes.
+- Respect reduced motion:
+  - with `useReducedMotion()`, no slide animation, just replace the number.
+- No click behavior needed.
+- No mobile version.
+- No dots, no progress pills, no side labels — just `01 / 07`.
+
+---
+
+### 6. Do NOT change anything else
+
+Keep:
+- the progress bar,
+- back-to-top button,
+- all FadeIn entrance animations,
+- the hero and navbar design,
+- button hover text-roll animations,
+- current spacing/layout.
+
+Only add:
+- section ids,
+- one hook,
+- one counter component,
+- one navbar insertion.
