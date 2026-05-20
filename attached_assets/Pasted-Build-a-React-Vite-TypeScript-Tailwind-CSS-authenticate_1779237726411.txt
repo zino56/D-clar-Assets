@@ -1,0 +1,769 @@
+Build a React + Vite + TypeScript + Tailwind CSS authenticated SaaS dashboard for "Déclaration Copilot" — an AI-powered declaration-readiness workspace for Algerian accountants.
+
+This is NOT a marketing page. This is the logged-in product experience after the user clicks "Démarrer" / "Commencer".
+
+The app should feel like:
+- a premium AI workspace
+- a serious accountant operating system
+- inspired by Hermes Workspace desktop layout
+- dense but elegant
+- built for action, review, anomaly fixing, and declaration readiness
+
+Use:
+- `lucide-react` for icons
+- `framer-motion` for panel transitions, section transitions, number changes, and agent panel animations
+- Tailwind CSS only
+- React Router for internal routes
+- NO backend integration yet; use realistic mock data in TypeScript objects
+- Layout must be desktop-first but responsive down to tablet and mobile
+- All screens must be production-quality UI, not wireframes
+
+Brand identity:
+- Primary accent: #1A6B5E (deep fiscal teal)
+- Secondary accent: #E8A020 (gold)
+- Background: #F4F3EF
+- Surface: #FFFFFF
+- Elevated surface: #FAF9F6
+- Dark surface: #141210
+- Text primary: #1C1A16
+- Text muted: #6B6966
+- Border: rgba(28, 26, 22, 0.08)
+- Critical red: #B83232
+- Warning amber: #D98A00
+- Success green: #2E7D32
+
+Font:
+Load "General Sans" from Fontshare in index.html:
+https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap
+
+Design principles:
+- This is an operational workspace, not an analytics dashboard
+- The user should understand what needs action within 5 seconds
+- Layout should use progressive disclosure: summary → drill-down → side panel
+- No generic SaaS 3-card stats hero
+- No purple gradients
+- No startup fluff
+- Every screen should feel like a real tool an Algerian accountant could use daily
+- Keep the page elegant and quiet: one strong accent color, restrained gold, clear status coding
+- Keep animations subtle and functional
+
+-----------------------------------
+APP STRUCTURE
+-----------------------------------
+
+Build the app with these top-level routes:
+
+1. `/app` → default redirects to `/app/inbox`
+2. `/app/inbox`
+3. `/app/documents/:id`
+4. `/app/readiness`
+5. `/app/followups`
+6. `/app/exports`
+7. `/app/jobs`
+8. `/app/agents`
+
+Use React Router with a persistent shell layout.
+
+-----------------------------------
+GLOBAL LAYOUT
+-----------------------------------
+
+Create a premium workspace shell with 4 persistent zones on desktop:
+
+### A. LEFT SIDEBAR
+Width ~ 260px desktop.
+White background, subtle right border.
+Contains:
+- Logo at top: circular dark icon with “DC”
+- Workspace name: “Déclaration Copilot”
+- Small label: “Cabinet El Amel” (mock accountant account)
+- Main navigation:
+  - Inbox
+  - Readiness
+  - Follow-ups
+  - Exports
+  - Jobs
+  - Agents
+- Bottom section:
+  - user profile mini card
+  - subscription badge: “Pro”
+  - button: “Need help?”
+- Active nav item:
+  - teal background tint
+  - teal icon
+  - medium weight text
+  - rounded-xl
+
+### B. TOPBAR
+Persistent topbar across pages.
+Height ~ 68px.
+Background rgba white with backdrop blur.
+Contains:
+- Left: page title + small contextual subtitle
+- Center: global search field with icon and placeholder:
+  “Rechercher document, NIF, RC, fournisseur…”
+- Right cluster:
+  - month selector (“Mai 2026”)
+  - notification bell with red dot
+  - sync status pill “Dernière synchro il y a 2 min”
+  - user avatar circle
+
+### C. MAIN CONTENT
+Scrollable content area.
+Use max-width behavior depending on page:
+- inbox and detail: wide
+- readiness: medium-wide
+- agents: full width
+
+### D. RIGHT AI AGENT PANEL
+This is important.
+Persistent collapsible right-side panel, inspired by Hermes Workspace.
+Default width ~ 360px desktop.
+Dark surface (#141210).
+Can be collapsed to a slim vertical rail.
+This panel makes the app feel like an intelligent workspace.
+
+The right panel contains:
+- Header:
+  - “Agent Workspace”
+  - status dot: “En veille” / “En cours”
+  - collapse button
+- Agent selector tabs/cards:
+  1. Classifier
+  2. Extractor
+  3. Fiscal Checker
+  4. Follow-up Writer
+  5. Export Agent
+  6. General Copilot
+- Active agent view:
+  - small pixel-ish AI avatar/icon block (retro-inspired but clean)
+  - short description of what this agent does
+  - “skills available” tags
+  - recent actions log
+  - one action composer area with structured task buttons (NOT open chat only)
+- Bottom quick actions:
+  - “Classer le document actif”
+  - “Relire les anomalies”
+  - “Générer message FR/AR”
+  - “Préparer export G50”
+
+This panel should feel alive, like an assistant workspace, but still professional.
+
+-----------------------------------
+AI AGENT CONCEPT
+-----------------------------------
+
+Do NOT make this a generic chatbot panel.
+
+Instead, model it as a multi-agent workspace with specialized skills.
+
+Each agent card must show:
+- agent name
+- role
+- status
+- supported skills
+- allowed outputs
+
+Use these agent definitions:
+
+1. **Classifier Agent**
+   - role: identifies document type
+   - skills: invoice classification, declaration relevance, confidence scoring
+   - outputs: invoice / delivery note / receipt / unknown
+
+2. **Extractor Agent**
+   - role: pulls structured data from OCR text
+   - skills: NIF, RC, Article d’imposition, date, supplier, amounts, payment method
+   - outputs: structured JSON field set
+
+3. **Fiscal Checker Agent**
+   - role: verifies readiness logic
+   - skills: missing field review, anomaly explanation, TVA consistency review, legal-risk surfacing
+   - outputs: warnings, blocking issues, confidence notes
+
+4. **Follow-up Writer Agent**
+   - role: drafts supplier/client follow-ups
+   - skills: French drafting, Arabic drafting, critical tone adjustment, urgency wording
+   - outputs: FR message, AR message, shorter reminder
+
+5. **Export Agent**
+   - role: prepares declaration-ready export bundles
+   - skills: period grouping, READY filtering, accountant summary drafting
+   - outputs: export preview, grouped rows, readiness summary
+
+6. **General Copilot**
+   - role: orchestration and explanation assistant
+   - skills: explain anomalies, suggest next actions, guide accountant through workflow
+   - outputs: guidance cards, next steps, review checklist
+
+For each agent, provide a “skills” mini-panel in the right workspace with tags and a recent action feed.
+
+-----------------------------------
+PAGE 1 — INBOX
+-----------------------------------
+
+Route: `/app/inbox`
+
+This is the main post-login screen.
+
+Purpose:
+- show what needs action today
+- allow upload
+- prioritize incomplete / blocked documents
+- give immediate operational visibility
+
+Layout:
+- Page title: “Inbox”
+- Subtitle: “Documents en attente d’analyse, de correction ou d’export”
+- Top action row:
+  - Primary button: “Importer un document”
+  - Secondary button: “Lancer l’analyse”
+  - Filter chips:
+    - Tous
+    - Ready
+    - Incomplete
+    - Blocked
+    - Processing
+    - Error
+- KPI strip (quiet operational KPIs, not giant):
+  - Ready: 42
+  - Incomplete: 11
+  - Blocked: 5
+  - Processing: 3
+  - This month exports: 2
+  Each in compact cards with subdued styling and status color accents.
+
+Main area:
+- Left 70%: document table
+- Right 30%: priority queue card + recent activity card
+
+### Document Table
+Columns:
+- Document
+- Client
+- Type
+- Date
+- Supplier
+- Score
+- Status
+- Anomalies
+- Actions
+
+Each row should feel polished.
+Use badges:
+- READY → green soft badge
+- INCOMPLETE → amber soft badge
+- BLOCKED → red soft badge
+- PROCESSING → blue/gray badge
+- ERROR → dark red badge
+
+Example mock documents:
+- Facture_047_Mai.pdf
+- BL_EntrepriseNour_12-05.pdf
+- Achat_OfficeExpress.png
+- Vente_ClientAtlas.pdf
+- Facture_IFU_SARL_Nova.pdf
+
+For score use small pill with number like:
+- 92 / 100
+- 64 / 100
+- 33 / 100
+
+Actions column:
+- View
+- Re-run
+- Open in agent
+
+### Right column cards
+1. **Priority Queue**
+   - title: “À traiter maintenant”
+   - list of 4 items with severity dots and short reason
+   - examples:
+     - “Facture_047_Mai.pdf — RC manquant”
+     - “Vente_ClientAtlas.pdf — espèces > 1.000.000 DA”
+     - “BL_EntrepriseNour.pdf — non déclaratif”
+2. **Recent Activity**
+   - a feed with timestamps:
+     - “Extractor Agent parsed 12 fields”
+     - “Follow-up Writer drafted FR/AR message”
+     - “Export Agent prepared May bundle”
+
+-----------------------------------
+PAGE 2 — DOCUMENT DETAIL
+-----------------------------------
+
+Route: `/app/documents/:id`
+
+This is the most important screen in the app.
+
+Create a powerful review workspace with 3-column feeling:
+- main document preview / fields
+- detail and anomalies
+- right persistent agent panel still visible
+
+Header:
+- breadcrumb: Inbox / Facture_047_Mai.pdf
+- document title
+- status badge
+- action buttons:
+  - Mark resolved
+  - Re-run extraction
+  - Copy follow-up
+  - Open export preview
+
+Main content sections:
+
+### Section A — Document Summary Strip
+A top strip of compact cards:
+- Type: Facture d’achat
+- Supplier: SARL Nova
+- Date: 12/05/2026
+- NIF: missing
+- RC: present
+- Score: 64/100
+- Status: INCOMPLETE
+
+### Section B — Split Content
+Desktop:
+- Left large column: original document preview mock
+- Right column: extracted structured fields form
+
+#### Left: Document Preview
+Use a realistic mock document canvas/card, not a blank gray box.
+Show:
+- top toolbar with zoom, page count, OCR text toggle
+- preview of invoice-style layout
+- some highlighted overlays for missing fields
+- if OCR text toggle pressed, show extracted raw text pane
+
+#### Right: Extracted Fields
+Grouped cards:
+1. Supplier Identity
+   - Nom fournisseur
+   - NIF
+   - RC
+   - Article d’imposition
+   - Adresse
+2. Invoice Data
+   - Numéro facture
+   - Date
+   - Mode de paiement
+3. Amounts
+   - HT
+   - TVA
+   - TTC
+4. Fiscal Meta
+   - Régime detected
+   - Declaration relevance
+   - Confidence
+
+Missing fields should show:
+- red outline
+- small warning label
+- optional “Ask agent” button
+
+### Section C — Anomalies Panel
+Card title: “Anomalies détectées”
+List 6 anomaly rows, each with:
+- severity dot
+- anomaly code
+- plain-language explanation
+- impact badge:
+  - Bloquant
+  - Risque
+  - À vérifier
+- action button: “Explain”
+
+Use these sample anomalies:
+- ANOMALIE_NIF_ACHAT
+- ANOMALIE_RC_ACHAT
+- ANOMALIE_ART_ACHAT
+- ANOMALIE_ADRESSE_ACHAT
+- ANOMALIE_MODE_PAIEMENT_VENTE
+- ANOMALIE_ESPECE_VENTE
+
+### Section D — Readiness Score Card
+Dark card or strong card.
+Show:
+- score circle or horizontal score meter
+- score 64 / 100
+- status INCOMPLETE
+- short explanation:
+  “3 blocking elements empêchent l’export G50”
+- checklist:
+  - NIF manquant
+  - Adresse fournisseur manquante
+  - Mode de paiement absent
+
+### Section E — Follow-up Drafts
+Two cards side by side:
+- Français
+- العربية
+
+French card:
+- formal supplier message
+- “copy” button
+- urgency badge
+
+Arabic card:
+- RTL
+- elegant dark card
+- copy button
+
+-----------------------------------
+PAGE 3 — READINESS BOARD
+-----------------------------------
+
+Route: `/app/readiness`
+
+Purpose:
+monthly declaration readiness overview
+
+Top:
+- title: “Readiness Board”
+- subtitle: “Vue mensuelle des documents prêts pour déclaration G50”
+- month selector
+- export CTA
+
+Main content:
+### A. Readiness overview strip
+Cards:
+- Ready docs
+- Incomplete docs
+- Blocked docs
+- Avg score
+- Exportable total DA
+
+### B. Monthly board
+A kanban-like 3-column board:
+- READY
+- INCOMPLETE
+- BLOCKED
+
+Each card shows:
+- document name
+- supplier
+- amount
+- score
+- top blocking issue or note
+
+### C. Period summary card
+Right-side or bottom summary:
+- total sales docs
+- total purchase docs
+- estimated TVA to declare
+- estimated TVA deductible
+- outstanding blocking docs
+- export readiness percentage
+
+### D. G50 export preview teaser
+A preview card with table-like rows:
+- Supplier
+- HT
+- TVA
+- TTC
+- status
+And CTA: “Ouvrir export”
+
+-----------------------------------
+PAGE 4 — FOLLOW-UPS
+-----------------------------------
+
+Route: `/app/followups`
+
+Purpose:
+review and copy pending supplier/client follow-ups
+
+Top:
+- title
+- subtitle
+- filters by criticality / language / status
+
+Main:
+List of follow-up cards with:
+- related document
+- target recipient
+- severity
+- FR tab
+- AR tab
+- copy actions
+- mark as sent
+- mark as resolved
+
+At top right:
+summary cards:
+- Pending: 14
+- Critical: 5
+- Sent today: 7
+
+-----------------------------------
+PAGE 5 — EXPORTS
+-----------------------------------
+
+Route: `/app/exports`
+
+Purpose:
+show export-ready periods and generated bundles
+
+Top:
+- title “Exports”
+- subtitle “Préparation des lots prêts pour G50”
+- period selector
+- button “Générer export”
+
+Main sections:
+### A. Export summary cards
+- Ready docs in selected period
+- Total HT
+- Total TVA
+- Total TTC
+- Export status
+
+### B. Export table preview
+Columns:
+- Doc
+- Supplier
+- Type
+- HT
+- TVA
+- TTC
+- Ready status
+
+### C. Accountant summary panel
+A side card showing:
+- “Mai 2026 export bundle”
+- 32 ready docs
+- 8 incomplete excluded
+- 4 blocked excluded
+- “Estimated declaration completeness: 79%”
+
+### D. Download cards
+Show 3 export artifacts:
+- Excel export
+- Readiness summary PDF
+- Follow-up outstanding list
+
+Buttons can be mock only.
+
+-----------------------------------
+PAGE 6 — JOBS
+-----------------------------------
+
+Route: `/app/jobs`
+
+Purpose:
+show background jobs / pipeline tasks / system activity
+
+Top:
+- title “Jobs”
+- subtitle “Tâches planifiées et exécutions récentes”
+
+Sections:
+### A. Scheduled jobs cards
+- process_pending_documents
+- deadline_reminder
+- export_ready_summary
+
+Each card shows:
+- status
+- next run
+- last run
+- duration
+- small button “Run now”
+
+### B. Job logs table
+Columns:
+- Job
+- Time
+- Result
+- Affected docs
+- Message
+
+### C. System health strip
+- OCR service: OK
+- Hermes: connected
+- Cache: warm
+- Export worker: idle
+
+-----------------------------------
+PAGE 7 — AGENTS
+-----------------------------------
+
+Route: `/app/agents`
+
+This page is the full-screen AI workspace view.
+
+It should feel like a command center.
+
+Top:
+- title “Agents”
+- subtitle “Compétences spécialisées pour automatiser la déclaration”
+- buttons:
+  - “Run active agent”
+  - “New task”
+  - “View logs”
+
+Main layout:
+### Left: Agent roster
+List all 6 agents as larger cards.
+Each card includes:
+- name
+- role
+- status
+- skills tags
+- last action
+- usage count today
+- select button
+
+### Center: Active agent workspace
+For selected agent show:
+- large title
+- what it can do
+- permitted inputs
+- output schema preview
+- action timeline
+- structured task composer
+
+Structured task composer examples:
+- Classifier Agent:
+  - “Classify current document”
+  - “Explain classification confidence”
+- Extractor Agent:
+  - “Extract full invoice schema”
+  - “Compare OCR vs extracted fields”
+- Fiscal Checker Agent:
+  - “Review anomalies”
+  - “Explain blocked status”
+- Follow-up Writer Agent:
+  - “Draft FR request”
+  - “Draft AR request”
+  - “Make tone more urgent”
+- Export Agent:
+  - “Prepare May bundle”
+  - “List excluded docs”
+- General Copilot:
+  - “What should I fix first?”
+  - “Summarize today’s blockers”
+
+### Right: Agent execution log
+Dark card with terminal/workspace feel.
+Entries like:
+- [01:14] Extractor Agent parsed Facture_047_Mai.pdf
+- [01:15] Fiscal Checker flagged ANOMALIE_NIF_ACHAT
+- [01:16] Follow-up Writer generated FR draft
+- [01:17] Export Agent grouped 32 ready docs
+
+At bottom:
+mini prompt-like structured input area:
+placeholder:
+“Décrire une tâche structurée pour l’agent actif…”
+and below it quick chips:
+- NIF missing
+- Explain anomaly
+- Prepare export
+- Draft message
+
+Important:
+This page must feel visually stronger than the others — like a professional AI operations workspace.
+
+-----------------------------------
+MOCK DATA
+-----------------------------------
+
+Create realistic Algerian accounting mock data:
+- supplier names: SARL Nova, EURL Atlas, Entreprise Nour, SARL Horizon, Office Express Algérie
+- dates in French format
+- DZD amounts
+- NIF / RC examples
+- statuses
+- anomalies
+- FR and AR messages
+- monthly period data
+- job logs
+- agent logs
+
+-----------------------------------
+COMPONENTS TO BUILD
+-----------------------------------
+
+Create reusable components:
+- AppShell
+- SidebarNav
+- Topbar
+- StatusBadge
+- ScorePill
+- MetricCard
+- DocumentTable
+- AgentPanel
+- AgentCard
+- AnomalyItem
+- FollowupCard
+- ExportTable
+- JobsTable
+- SectionCard
+- SearchInput
+- EmptyState
+- ActivityFeed
+
+-----------------------------------
+INTERACTIONS
+-----------------------------------
+
+Add subtle but polished interactions:
+- page transitions with framer-motion
+- hover elevation on cards
+- subtle count-up or number transitions on metrics
+- row hover state in tables
+- agent panel collapse / expand animation
+- active route highlight in sidebar
+- animated changing status in agent panel
+- copy buttons with “copied” state
+- tabs for FR/AR messages
+- filter chips toggle active state
+- search field focus ring in teal
+- skeleton placeholders if useful
+
+Respect reduced motion:
+- useReducedMotion where relevant
+- no excessive animation
+
+-----------------------------------
+MOBILE / TABLET BEHAVIOR
+-----------------------------------
+
+- Sidebar becomes slide-over drawer
+- Right AI agent panel becomes bottom sheet or hidden drawer on small screens
+- Topbar compresses gracefully
+- Tables can horizontally scroll
+- Preserve professional look on tablet first
+- Desktop remains primary experience
+
+-----------------------------------
+VISUAL STYLE
+-----------------------------------
+
+- Premium enterprise app
+- Inspired by Hermes Workspace / linear / premium operator tool
+- Crisp borders, rounded-xl / rounded-2xl
+- Quiet shadows
+- Dense but breathable spacing
+- No visual clutter
+- No gimmicky gradients
+- Use dark agent panel to contrast with light workspace
+- The AI panel should make the product feel “alive”
+
+-----------------------------------
+DELIVERABLE
+-----------------------------------
+
+Generate the full React app structure with:
+- routes
+- layout shell
+- all 7 pages
+- reusable components
+- mock data
+- polished UI
+- no backend required yet
+
+Do not stop at one page.
+Build the full dashboard application in one coherent design system.
