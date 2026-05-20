@@ -1,0 +1,71 @@
+Yes — add a scroll progress indicator. Here is the exact implementation:
+
+---
+
+### 1. Create `src/components/ScrollProgress.tsx`
+
+```tsx
+import { motion, useScroll, useSpring } from 'framer-motion';
+import { useReducedMotion } from 'framer-motion';
+
+export function ScrollProgress() {
+  const shouldReduce = useReducedMotion();
+  const { scrollYProgress } = useScroll();
+
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 200,
+    damping: 30,
+    restDelta: 0.001,
+  });
+
+  if (shouldReduce) return null;
+
+  return (
+    <motion.div
+      style={{ scaleX }}
+      className="fixed top-0 left-0 right-0 h-[2px] bg-[#1A6B5E] z- origin-left"
+    />
+  );
+}
+```
+
+---
+
+### 2. Mount it once in `App.tsx` (or your root layout)
+
+Import and place `<ScrollProgress />` as the very first child inside the root 
+`<div>` or `<main>`, before any section component:
+
+```tsx
+import { ScrollProgress } from './components/ScrollProgress';
+
+// inside your root render:
+<>
+  <ScrollProgress />
+  {/* existing sections... */}
+</>
+```
+
+---
+
+### Rules
+
+- `useScroll()` with no arguments tracks `document.scrollY` — no ref needed, works for the full page.
+- `useSpring()` smooths the raw scroll progress so the bar doesn't jump on trackpad flicks. 
+  Use stiffness: 200, damping: 30 — this gives a slight lag that feels physical without 
+  being slow. Do NOT use a linear `useTransform` — it will feel mechanical.
+- `origin-left` + `scaleX` is the correct pattern. Do NOT use `width` for this — 
+  animating `width` forces layout recalculations on every frame. `scaleX` is GPU-only.
+- Height: exactly 2px. Not 3px, not 4px. Thinner reads as refined.
+- Color: `#1A6B5E` (matches the primary teal throughout the site). No gradient.
+- z-index: 9999 — must sit above the navbar pill (which is z-20).
+- `if (shouldReduce) return null` — users with reduced motion see nothing, 
+  not even a static bar.
+- Do NOT add a background track (a gray line behind it). The bare line on 
+  the white/teal surface is cleaner.
+
+---
+
+### Do NOT change anything else.
+All existing animations, hover states, shader background, and section 
+layout stay exactly as they are. This is a single new component + one import.

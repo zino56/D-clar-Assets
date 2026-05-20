@@ -1,0 +1,45 @@
+Review and fix the following issues on the landing page:
+
+1. FONT FALLBACK CHECK
+   The heading in Section 1 hero should be in General Sans, not system sans-serif.
+   Verify the Fontshare CDN link loaded correctly. If not, re-add this to index.html <head>:
+   <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap" rel="stylesheet">
+
+2. ARABIC SECTION (Section 5, Card AR)
+   The Arabic card body text must have:
+   - dir="rtl" on the paragraph element
+   - text-right class
+   - line-height of at least 1.9 (Arabic script needs more leading than Latin)
+   Verify these are present. If the Arabic text is left-aligned, fix it now.
+
+3. BUTTON HOVER TEXT-ROLL
+   All CTA buttons (hero, Section 2, footer) must have the text-roll animation:
+   - Two spans stacked vertically inside overflow-hidden h-[20px] container
+   - On group-hover: translate-y-[-50%] with duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)]
+   - Arrow icon rotates -45deg → 0deg on hover
+   If any button is missing this, fix it.
+
+4. MOBILE NAV BOTTOM SHEET
+   On mobile (375px), the Menu button should open a bottom sheet that slides up 
+   from the bottom (translate-y-full → translate-y-0), not a top dropdown.
+   Verify this works on mobile viewport.
+
+5. DO NOT add a waitlist form or database. Instead, when the user clicks 
+   "Demander une démo" or "Demander l'accès anticipé":
+   - Show a simple inline confirmation replacing the button:
+     ✓ "Merci — nous vous contacterons sous 24h."
+   - Store nothing. No backend, no database, no email service.
+   This is a static landing page only.
+
+6. SECTION 2 — DARK MOCK CARD
+   The pulsing teal dot next to "Document analysé" should have a CSS pulse animation:
+   @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+   If it's static, add the animation.
+
+7. SECTION 6 — V2 BADGE
+   The "200+ clients/serveur" card should have a small "V2" badge 
+   (teal background, small text) to indicate it's a future version.
+   If missing, add it.
+
+After all fixes, verify the page at both 1280px desktop and 375px mobile width 
+before confirming done.

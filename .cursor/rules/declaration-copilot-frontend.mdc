@@ -1,0 +1,26 @@
+---
+description: Declaration Copilot frontend stack, UX, and routes
+globs: "{frontend,src}/**/*.{tsx,ts,css}"
+alwaysApply: false
+---
+
+# Frontend
+
+## Stack
+React 18, TypeScript, Vite, Tailwind CSS, Framer Motion, React Router, lucide-react, General Sans (Fontshare)
+
+## UX rules
+- Default post-login screen: **Inbox**, not a KPI vanity dashboard
+- Prioritize: upload, document status, anomalies, follow-up actions, readiness
+- Structured actions and buttons — not open-ended prompts
+- Right-side AI agent workspace allowed but must stay task-oriented
+- Premium, dense, professional UI — no purple gradients, startup aesthetics, or generic feature cards
+
+## Routes
+`/app/inbox` | `/app/documents/:id` | `/app/readiness` | `/app/followups` | `/app/exports` | `/app/jobs` | `/app/agents`
+
+## Coding
+- TypeScript strict — avoid `any`
+- Reuse existing components before creating new ones
+- Minimal diffs; do not rename files or add packages unless asked
+- Never invent backend endpoints without labeling TODO/mock

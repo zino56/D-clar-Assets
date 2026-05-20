@@ -1,0 +1,107 @@
+Yes — add a "back to top" floating button. Exact implementation:
+
+---
+
+### 1. Create `src/components/BackToTop.tsx`
+
+```tsx
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { ArrowUp } from 'lucide-react';
+
+export function BackToTop() {
+  const shouldReduce = useReducedMotion();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      // Show after user scrolls past 100vh
+      setVisible(window.scrollY > window.innerHeight);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    if (shouldReduce) {
+      window.scrollTo({ top: 0 });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.button
+          key="back-to-top"
+          onClick={scrollToTop}
+          aria-label="Retour en haut de page"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 12 }}
+          transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.94 }}
+          className="fixed bottom-6 right-6 z- w-10 h-10 rounded-full 
+                     bg-[#141210] text-white shadow-lg
+                     flex items-center justify-center
+                     focus-visible:outline-2 focus-visible:outline-offset-2 
+                     focus-visible:outline-[#1A6B5E]"
+        >
+          <ArrowUp size={16} strokeWidth={2} />
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+}
+```
+
+---
+
+### 2. Mount in `App.tsx`
+
+Add `<BackToTop />` directly after `<ScrollProgress />`:
+
+```tsx
+import { BackToTop } from './components/BackToTop';
+
+<>
+  <ScrollProgress />
+  <BackToTop />
+  {/* existing sections */}
+</>
+```
+
+---
+
+### Rules — do not deviate
+
+- Trigger threshold: `window.scrollY > window.innerHeight` — appears after 
+  exactly one full viewport height of scroll (past the hero). NOT a fixed 
+  pixel value like 300px or 500px.
+- Position: `bottom-6 right-6` (24px from each edge). Do NOT use bottom-8 
+  or any other value — 24px keeps it clear of mobile browser chrome.
+- Size: exactly w-10 h-10 (40px). Touch target is met. Do NOT make it larger — 
+  a 48px circle in the corner feels heavy.
+- Color: bg-[#141210] (near-black). NOT teal — the teal is already used for 
+  the progress bar at the top. Two teal fixed elements in the same viewport 
+  creates visual competition. The dark button is quiet but clearly clickable.
+- Icon: ArrowUp from lucide-react, size 16, strokeWidth 2. Centered with flex.
+- Shadow: Tailwind `shadow-lg` — the button needs to lift off the content below it.
+- Animation: `AnimatePresence` handles the mount/unmount. Entry: fade + y:12→0. 
+  Exit: fade + y:0→12. Duration 0.3s. Do NOT use scale for entry/exit — only 
+  for hover/tap micro-interactions.
+- `whileHover={{ scale: 1.08 }}` + `whileTap={{ scale: 0.94 }}` — these replace 
+  any CSS :hover/:active on this element. Remove any Tailwind hover: classes.
+- `{ passive: true }` on the scroll listener — mandatory for performance, 
+  prevents blocking the main thread.
+- `aria-label="Retour en haut de page"` — French to match the site language. 
+  Icon-only buttons must always have aria-label.
+- `useReducedMotion`: if true, `scrollTo` uses no `behavior: 'smooth'` — 
+  instant jump to top instead.
+- z-index: 9998 — one below the progress bar (9999) so they never overlap.
+
+### Do NOT change anything else.
+ScrollProgress, all section animations, hover states, shader, and layout 
+stay exactly as they are.

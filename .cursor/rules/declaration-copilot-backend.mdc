@@ -1,0 +1,22 @@
+---
+description: Declaration Copilot backend stack and API conventions
+globs: "{backend,api}/**/*.py"
+alwaysApply: false
+---
+
+# Backend
+
+## Stack
+FastAPI, SQLite (MVP), Hermes client, deterministic pipeline modules in Python
+
+## Expected endpoints
+- `GET /documents`
+- `POST /documents/upload`
+- `GET /documents/{id}`
+- `GET /documents/{id}/followups`
+
+## Hermes boundary
+- Skills return reasoning/extraction only
+- Deterministic pipeline sets status, scores, validation, DB writes, exports
+- Keep FastAPI changes explicit and simple
+- Do not invent endpoints without clearly labeling TODO/mock

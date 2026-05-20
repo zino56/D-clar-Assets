@@ -1,0 +1,16 @@
+---
+description: Declaration Copilot implementation workflow
+alwaysApply: true
+---
+
+# Working style
+
+When asked to implement something:
+
+1. Inspect relevant files first
+2. Summarize current state
+3. List assumptions
+4. Propose a small implementation plan
+5. Then apply changes
+
+Prefer minimal diffs over full rewrites. If changing architecture, explain the impact first.

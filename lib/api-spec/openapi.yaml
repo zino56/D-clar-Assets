@@ -1,0 +1,598 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.2.0
+  description: Declaration Copilot API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+  - name: documents
+  - name: inbox
+  - name: agent
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /inbox/summary:
+    get:
+      operationId: getInboxSummary
+      tags: [inbox]
+      summary: Inbox KPI summary
+      responses:
+        "200":
+          description: Summary metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InboxSummary"
+  /documents:
+    get:
+      operationId: listDocuments
+      tags: [documents]
+      summary: List documents
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/DocumentStatus"
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [newest, oldest, score_desc, score_asc, anomalies_desc]
+      responses:
+        "200":
+          description: Document list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentListResponse"
+  /documents/{id}:
+    get:
+      operationId: getDocument
+      tags: [documents]
+      summary: Get document detail
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      responses:
+        "200":
+          description: Document detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DocumentDetail"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorBody"
+  /documents/{id}/followups:
+    get:
+      operationId: listDocumentFollowups
+      tags: [documents]
+      summary: Follow-ups for a document
+      parameters:
+        - $ref: "#/components/parameters/DocumentId"
+      responses:
+        "200":
+          description: Follow-ups
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FollowUpListResponse"
+  /followups:
+    get:
+      operationId: listFollowups
+      tags: [documents]
+      summary: All follow-up messages
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/FollowUpStatus"
+        - name: severity
+          in: query
+          schema:
+            $ref: "#/components/schemas/Severity"
+        - name: language
+          in: query
+          schema:
+            type: string
+            enum: [fr, ar]
+      responses:
+        "200":
+          description: Follow-ups
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FollowUpListResponse"
+  /agent-activity:
+    get:
+      operationId: listAgentActivity
+      tags: [agent]
+      summary: Recent pipeline activity
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        "200":
+          description: Activity feed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentActivityListResponse"
+  /skills:
+    get:
+      operationId: listSkills
+      tags: [agent]
+      summary: AI skills registry
+      responses:
+        "200":
+          description: Skills
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SkillListResponse"
+  /tools:
+    get:
+      operationId: listTools
+      tags: [agent]
+      summary: Deterministic tools registry
+      responses:
+        "200":
+          description: Tools
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ToolListResponse"
+  /agent/overview:
+    get:
+      operationId: getAgentOverview
+      tags: [agent]
+      summary: Agent system overview
+      responses:
+        "200":
+          description: Overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgentOverview"
+components:
+  parameters:
+    DocumentId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    HealthStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+    ErrorBody:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+    DocumentStatus:
+      type: string
+      enum: [READY, INCOMPLETE, BLOCKED, PROCESSING, ERROR]
+    Severity:
+      type: string
+      enum: [BLOCKING, RISK, WARNING]
+    FollowUpStatus:
+      type: string
+      enum: [pending, sent, resolved]
+    ActivityType:
+      type: string
+      enum: [skill, tool, status]
+    PipelineStepState:
+      type: string
+      enum: [completed, current, blocked, pending]
+    PipelineActor:
+      type: string
+      enum: [skill, tool, system]
+    InboxSummary:
+      type: object
+      required: [documentsToday, readyCount, incompleteCount, blockedCount, processingCount]
+      properties:
+        documentsToday:
+          type: integer
+        readyCount:
+          type: integer
+        incompleteCount:
+          type: integer
+        blockedCount:
+          type: integer
+        processingCount:
+          type: integer
+    DocumentSummary:
+      type: object
+      required:
+        - id
+        - filename
+        - documentType
+        - entityName
+        - status
+        - score
+        - anomalyCount
+        - createdAt
+      properties:
+        id:
+          type: string
+        filename:
+          type: string
+        documentType:
+          type: string
+        entityName:
+          type: string
+        clientName:
+          type: string
+        status:
+          $ref: "#/components/schemas/DocumentStatus"
+        score:
+          type: integer
+        anomalyCount:
+          type: integer
+        createdAt:
+          type: string
+        amountTtc:
+          type: number
+        regime:
+          type: string
+    DocumentListResponse:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/DocumentSummary"
+        total:
+          type: integer
+    ExtractedField:
+      type: object
+      required: [key, label, value, missing]
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        value:
+          type: string
+          nullable: true
+        missing:
+          type: boolean
+        group:
+          type: string
+    Anomaly:
+      type: object
+      required: [code, severity, description, impact]
+      properties:
+        code:
+          type: string
+        severity:
+          $ref: "#/components/schemas/Severity"
+        description:
+          type: string
+        impact:
+          type: string
+    FollowUpMessage:
+      type: object
+      required:
+        - id
+        - documentId
+        - documentName
+        - recipient
+        - severity
+        - status
+        - fr
+        - ar
+        - createdAt
+      properties:
+        id:
+          type: string
+        documentId:
+          type: string
+        documentName:
+          type: string
+        recipient:
+          type: string
+        severity:
+          $ref: "#/components/schemas/Severity"
+        status:
+          $ref: "#/components/schemas/FollowUpStatus"
+        fr:
+          type: string
+        ar:
+          type: string
+        createdAt:
+          type: string
+        reviewed:
+          type: boolean
+    FollowUpListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/FollowUpMessage"
+    PipelineStep:
+      type: object
+      required: [id, label, state, actor, explanation]
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        state:
+          $ref: "#/components/schemas/PipelineStepState"
+        actor:
+          $ref: "#/components/schemas/PipelineActor"
+        actorName:
+          type: string
+        explanation:
+          type: string
+        completedAt:
+          type: string
+          nullable: true
+    SkillRun:
+      type: object
+      required: [name, role, inputSummary, outputSummary, status]
+      properties:
+        name:
+          type: string
+        role:
+          type: string
+        inputSummary:
+          type: string
+        outputSummary:
+          type: string
+        confidence:
+          type: number
+          nullable: true
+        status:
+          type: string
+          enum: [success, warning, error, idle]
+    DeterministicCheck:
+      type: object
+      required: [name, verified, result, rationale]
+      properties:
+        name:
+          type: string
+        verified:
+          type: string
+        result:
+          type: string
+          enum: [passed, failed, warning]
+        rationale:
+          type: string
+    ReadinessDecision:
+      type: object
+      required: [score, status, blockingFields, warnings, nextAction]
+      properties:
+        score:
+          type: integer
+        status:
+          $ref: "#/components/schemas/DocumentStatus"
+        blockingFields:
+          type: array
+          items:
+            type: string
+        warnings:
+          type: array
+          items:
+            type: string
+        nextAction:
+          type: string
+        declarationMonth:
+          type: string
+    DocumentDetail:
+      type: object
+      required:
+        - id
+        - filename
+        - documentType
+        - entityName
+        - status
+        - score
+        - anomalyCount
+        - createdAt
+        - extractedFields
+        - anomalies
+        - timeline
+        - skillsUsed
+        - deterministicChecks
+        - readiness
+      properties:
+        id:
+          type: string
+        filename:
+          type: string
+        documentType:
+          type: string
+        entityName:
+          type: string
+        clientName:
+          type: string
+        status:
+          $ref: "#/components/schemas/DocumentStatus"
+        score:
+          type: integer
+        anomalyCount:
+          type: integer
+        createdAt:
+          type: string
+        regime:
+          type: string
+        confidence:
+          type: number
+          nullable: true
+        amount:
+          type: object
+          properties:
+            ht:
+              type: number
+            tva:
+              type: number
+            ttc:
+              type: number
+        extractedFields:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExtractedField"
+        anomalies:
+          type: array
+          items:
+            $ref: "#/components/schemas/Anomaly"
+        timeline:
+          type: array
+          items:
+            $ref: "#/components/schemas/PipelineStep"
+        skillsUsed:
+          type: array
+          items:
+            $ref: "#/components/schemas/SkillRun"
+        deterministicChecks:
+          type: array
+          items:
+            $ref: "#/components/schemas/DeterministicCheck"
+        readiness:
+          $ref: "#/components/schemas/ReadinessDecision"
+        followups:
+          type: array
+          items:
+            $ref: "#/components/schemas/FollowUpMessage"
+    AgentActivity:
+      type: object
+      required: [id, type, title, detail, createdAt]
+      properties:
+        id:
+          type: string
+        type:
+          $ref: "#/components/schemas/ActivityType"
+        title:
+          type: string
+        detail:
+          type: string
+        createdAt:
+          type: string
+        severity:
+          $ref: "#/components/schemas/Severity"
+        skillOrTool:
+          type: string
+    AgentActivityListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AgentActivity"
+    SkillDefinition:
+      type: object
+      required:
+        - name
+        - title
+        - description
+        - inputSchemaSummary
+        - outputSchemaSummary
+        - stage
+        - status
+      properties:
+        name:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        inputSchemaSummary:
+          type: string
+        outputSchemaSummary:
+          type: string
+        stage:
+          type: string
+        status:
+          type: string
+          enum: [active, idle, error]
+        usedWhen:
+          type: string
+    SkillListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/SkillDefinition"
+    ToolDefinition:
+      type: object
+      required: [name, title, description, status]
+      properties:
+        name:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          enum: [active, coming_soon]
+        verifies:
+          type: string
+    ToolListResponse:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ToolDefinition"
+    AgentOverview:
+      type: object
+      required:
+        - name
+        - status
+        - documentsAnalyzed
+        - averageReadinessScore
+        - anomaliesThisWeek
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [active, idle, processing]
+        documentsAnalyzed:
+          type: integer
+        averageReadinessScore:
+          type: integer
+        anomaliesThisWeek:
+          type: integer
+        skillsActive:
+          type: integer
+        lastPipelineRun:
+          type: string

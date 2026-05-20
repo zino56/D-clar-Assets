@@ -1,0 +1,343 @@
+Build a React + Vite + Tailwind CSS landing page for "Déclaration Copilot" — an AI-powered 
+declaration-readiness SaaS for Algerian accountants. Use the `shaders` package (npm: `shaders`) 
+for the hero background, `lucide-react` for icons.
+
+The brand identity:
+- Primary accent: #1A6B5E (deep accounting teal — serious, professional, not startup-orange)
+- Secondary accent: #E8A020 (gold — references DGI/fiscal authority, used sparingly)
+- Background: #F4F3EF (warm off-white, serious document feel)
+- Dark surface: #141210 (near-black for navbar logo, dark sections)
+- Text: #1C1A16 (near-black warm)
+- Muted text: #6B6966
+- Error/alert: #B83232 (fiscal risk red)
+
+Font: Load "General Sans" from Fontshare for both display and body.
+URL: https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700&display=swap
+
+---
+
+## SECTION 1: HERO (Full viewport height)
+
+**Background:** Warm off-white #F4F3EF with a full-screen animated shader overlay 
+(positioned absolute, inset-0, z-10, pointer-events-none). Shader stack from `shaders/react`:
+- `Swirl` — colorA: "#f4f3ef", colorB: "#e8e6e0", detail: 1.4
+- `ChromaFlow` — baseColor: "#f4f3ef", downColor/leftColor/rightColor/upColor: "#1A6B5E", 
+  momentum: 10, radius: 3.2
+- `FlutedGlass` — aberration: 0.45, angle: 25, frequency: 7, highlight: 0.10, 
+  highlightSoftness: 0, lightAngle: -80, refraction: 3.5, shape: "rounded", 
+  softness: 1, speed: 0.12
+- `FilmGrain` — strength: 0.04
+
+**Navigation (z-20, relative):** Pill-shaped white navbar (`bg-white rounded-full shadow-sm`) 
+with 5px padding, inside a max-w-[1440px] container with p-2 sm:p-3.
+
+- LEFT: Dark circle logo (w-9 h-9 sm:w-10 sm:h-10, bg-[#141210], rounded-full) with white 
+  text "DC" (10px/11px, font-bold, tracking-tight, font General Sans). 
+  Next to it (hidden mobile, shown md+): nav links "Fonctionnalités", "Comment ça marche", 
+  "Tarifs", "Contact" — 14px, text-gray-900, hover:text-[#1A6B5E], transition-colors 
+  duration-300, gap-6.
+
+- RIGHT (hidden mobile, shown md+):
+  - Text "Disponible pour comptables algériens" (13px, text-gray-500, hidden below lg)
+  - Clock icon (lucide, size 14) + live Algiers time "{HH:MM} à Alger" (13px, text-gray-600)
+  - CTA button: bg-[#141210], text-white, 13px font-medium, rounded-full, pl-5 pr-2 py-2. 
+    Text "Demander une démo" with HOVER TEXT ROLL animation: text duplicated inside flex-col 
+    with overflow-hidden h-[20px], on group-hover translates -50% vertically 
+    (duration-500, ease cubic-bezier(0.25,0.1,0.25,1)). Arrow icon in white circle 
+    (w-6 h-6) that rotates -45deg on hover.
+
+- MOBILE: "Menu"/"Close" toggle (md:hidden), bg-[#141210], rounded-full, Menu/X icons from 
+  lucide-react.
+
+**Mobile Menu Overlay:** Fixed inset-0, z-50. Black/60 backdrop. White bottom sheet 
+(rounded-2xl, mx-3 mb-3) slides up (translate-y-full → translate-y-0, duration-500, 
+ease cubic-bezier(0.32,0.72,0,1)). Contains: time badge, nav links (28px/32px font-medium), 
+"Commencer gratuitement" button with arrow.
+
+**Hero Content (z-20):** Positioned at bottom of viewport using flexbox (flex-1 spacer above).
+Max-w-[1440px], px-5 sm:px-8 lg:px-12, pb-14 sm:pb-16 lg:pb-20.
+
+- Small label: "Déclaration Copilot" (13px/14px, text-[#1C1A16], tracking-wide, mb-5 sm:mb-8)
+- Headline h1: 
+  "Vos documents G50, / prêts à déclarer — / sans effort, sans erreur."
+  clamp(1.75rem,7vw,4.2rem) mobile, clamp(2.5rem,5vw,4.2rem) sm+. font-medium (600), 
+  leading-[1.08], tracking-[-0.03em], text-[#1C1A16].
+  Use `<br className="hidden sm:block" />` with `<span className="sm:hidden"> </span>` 
+  for mobile fallback spaces.
+
+- CTA row (mt-8 sm:mt-12, flex-col sm:flex-row, gap-4 sm:gap-5):
+  - Primary button: bg-[#1A6B5E], hover:bg-[#145549], text-white, 13px/14px, rounded-full, 
+    pl-5 sm:pl-6 pr-2 py-2. Text "Commencer maintenant" with text-roll hover animation. 
+    White circle (w-7 h-7 sm:w-8 sm:h-8) with teal ArrowRight that rotates -45deg on hover.
+  - Trust badge: White pill with shadow (0_2px_8px_rgba(0,0,0,0.08)), rounded-[4px]. 
+    Contains: shield-check lucide icon (w-5 h-5, text-[#1A6B5E]), 
+    text "Fiscalité algérienne 2025" (13px/14px font-medium), 
+    dark badge "DGI Aligné" (10px/11px, bg-[#141210], text-white, px-2 py-0.5, rounded).
+
+---
+
+## SECTION 2: WHAT IT DOES (White background)
+
+`bg-white`, pt-16 sm:pt-20 lg:pt-32, pb-12 sm:pb-16 lg:pb-24.
+Max-w-[1440px] container, px-5 sm:px-8 lg:px-12.
+
+**Badge row:** flex items-center gap-3, mb-6 sm:mb-8.
+- Numbered circle: w-6 h-6 sm:w-7 sm:h-7, rounded-full, bg-[#1A6B5E], text-white, 
+  11px font-semibold. Shows "1".
+- Pill label: "Ce que fait le Copilot" — 12px, font-medium, border border-gray-200, 
+  rounded-full, px-3 sm:px-4 py-1.
+
+**Heading h2:** "OCR, extraction, scoring G50 — / tout le pipeline, sans saisie manuelle."
+clamp(1.5rem,4vw,3.2rem), font-medium, leading-[1.12], tracking-[-0.02em], 
+text-[#1C1A16], mb-12 sm:mb-16 lg:mb-28.
+
+**Content area — DESKTOP (hidden lg:grid):** `grid-cols-[26%_1fr_48%] items-end gap-6 xl:gap-8`.
+
+Left column (self-end): 
+  A styled feature card showing the 4-step pipeline as a vertical list. 
+  Rounded-2xl, bg-[#F4F3EF], p-6. Title "Pipeline automatique" (14px, font-semibold, mb-4).
+  Steps list — each step: flex gap-3, items-start, mb-3:
+    Step 1: Upload icon (lucide FileUp, size 16, text-[#1A6B5E]) + "OCR extraction" (13px)
+    Step 2: Brain icon (lucide Cpu, size 16, text-[#1A6B5E]) + "Classification Hermes" (13px)
+    Step 3: CheckCircle icon (lucide CheckCircle2, size 16, text-[#1A6B5E]) + 
+            "Vérification arithmétique" (13px)
+    Step 4: FileText icon (lucide FileText, size 16, text-[#E8A020]) + 
+            "Score G50 + statut" (13px, text-[#E8A020] for this item only)
+
+Center column (self-start, flex flex-col justify-end):
+  Paragraph: "Importez une facture, un bon de livraison ou tout document DGI. 
+  Le Copilot extrait les champs, vérifie les calculs TVA, détecte les anomalies fiscales 
+  et vous dit exactement ce qui manque pour votre G50."
+  (16px/18px, leading-[1.65], text-[#1C1A16], max-w-[38ch])
+  + teal button "Voir la démo" same text-roll animation, arrow rotates -45deg.
+
+Right column (self-end): 
+  A mock status card. Rounded-2xl, bg-[#141210], p-6, text-white.
+  Header: "Document analysé" (12px, text-gray-400, mb-4) + small teal dot pulsing.
+  Three status rows, each: flex justify-between items-center py-2 border-b border-white/10:
+    Row 1: "NIF Fournisseur" (13px, text-gray-300) | green badge "TROUVÉ" 
+           (10px, bg-green-900/50, text-green-400, px-2 py-0.5 rounded)
+    Row 2: "RC Fournisseur" (13px, text-gray-300) | red badge "MANQUANT" 
+           (10px, bg-red-900/50, text-red-400, px-2 py-0.5 rounded)
+    Row 3: "Calcul TVA HT+TVA=TTC" (13px, text-gray-300) | green badge "VÉRIFIÉ"
+  Bottom: Score bar. Label "Score G50" (12px, text-gray-400, mb-2). 
+  Progress bar: h-2, bg-white/10, rounded-full. Fill: w-[65%], bg-[#1A6B5E], rounded-full.
+  "65 / 100 — INCOMPLET" (11px, text-gray-400, mt-1).
+
+**Content area — MOBILE/TABLET (lg:hidden):** Stacked.
+  Paragraph + teal button, then the dark status card below (full width, rounded-2xl).
+
+---
+
+## SECTION 3: WHAT HERMES DOES (bg-[#F4F3EF])
+
+`bg-[#F4F3EF]`, pt-16 sm:pt-20 lg:pt-28, pb-16 sm:pb-20 lg:pb-28.
+Max-w-[1440px] container, px-5 sm:px-8 lg:px-12.
+
+**Badge row:** same pattern, number "2", label "Le rôle de l'IA", border-gray-300.
+
+**Heading h2:** "L'IA lit. Python calcule. / Vous validez."
+Same clamp sizing as hero headline. font-medium, leading-[1.08], tracking-[-0.03em], 
+mb-10 sm:mb-14 lg:mb-16.
+
+**2-column cards grid:** `grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 lg:gap-7`.
+
+**Card 1 — Ce que fait Hermes:**
+Container: bg-white, rounded-2xl, p-6 sm:p-8, group, cursor-default.
+Top label: "Intelligence artificielle" (11px, font-semibold, tracking-widest, uppercase, 
+            text-[#1A6B5E], mb-4)
+Title: "Hermes lit et comprend" (20px/22px, font-semibold, text-[#1C1A16], mb-3)
+Body: "Hermes lit le texte OCR de chaque facture et comprend le contexte. Il extrait 
+le NIF, le RC, les montants — même sur des formats jamais vus. Il classe le document, 
+détecte le régime fiscal (IFU/RNS/IBS) et rédige les relances bilingues français/arabe."
+(14px/15px, leading-[1.65], text-[#6B6966])
+Capability tags row (mt-5, flex flex-wrap gap-2): 
+  Each tag: text-[#1A6B5E], bg-[#1A6B5E]/8, rounded-full, px-3 py-1, 12px font-medium.
+  Tags: "Classification", "Extraction NIF/RC", "Détection régime", "Relances FR/AR", "Confiance 0–1"
+Bottom row (mt-6, flex items-center justify-between):
+  Left: "4 compétences" (12px, text-gray-400)
+  Right: Lucide Brain icon (size 18, text-[#1A6B5E])
+
+**Card 2 — Ce que fait Python:**
+Container: bg-[#141210], rounded-2xl, p-6 sm:p-8, group, cursor-default.
+Top label: "Outils déterministes" (11px, font-semibold, tracking-widest, uppercase, 
+            text-[#E8A020], mb-4)
+Title: "Python calcule et décide" (20px/22px, font-semibold, text-white, mb-3)
+Body: "Toute la fiscalité algérienne est codée en Python pur. TVA 19%/9%, IFU 5%/12%, 
+IRG barème APLF 2022, IBS 19%/26%, amortissements, vérification arithmétique, 
+détection espèces > 1.000.000 DA. Résultat : READY / INCOMPLETE / BLOCKED."
+(14px/15px, leading-[1.65], text-gray-400)
+Capability tags row (mt-5, flex flex-wrap gap-2):
+  Each tag: text-[#E8A020], bg-[#E8A020]/10, rounded-full, px-3 py-1, 12px font-medium.
+  Tags: "TVA nette G50", "IFU trimestriel", "IRG barème 2022", "IBS secteur", 
+        "Espèces illégales", "Score 0–100"
+Bottom row (mt-6, flex items-center justify-between):
+  Left: "9 fonctions · 0 hallucinations" (12px, text-gray-500)
+  Right: Lucide Calculator icon (size 18, text-[#E8A020])
+
+---
+
+## SECTION 4: ANOMALY DETECTION (White background)
+
+`bg-white`, pt-16 sm:pt-20 lg:pt-28, pb-16 sm:pb-20 lg:pb-28.
+Max-w-[1440px] container, px-5 sm:px-8 lg:px-12.
+
+**Badge row:** number "3", label "Contrôle fiscal automatique", border-gray-200.
+
+**Heading h2:** "11 anomalies détectées / automatiquement."
+Same clamp sizing. font-medium, leading-[1.08], tracking-[-0.03em], mb-10 sm:mb-14.
+
+**Anomaly grid:** `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4`.
+Each anomaly card: rounded-xl, border border-gray-100, p-4 sm:p-5, bg-white, 
+hover:shadow-md, transition-shadow duration-200.
+
+Left side: colored dot (w-2 h-2, rounded-full, flex-shrink-0, mt-1.5).
+Right side: code label (11px, font-mono, font-medium, mb-1) + description (13px, text-gray-600).
+
+Show these 6 anomalies (most critical first):
+
+1. dot bg-red-500, code "ANOMALIE_NIF_ACHAT" (text-red-600), 
+   desc "NIF fournisseur absent — TVA déductible rejetée"
+
+2. dot bg-red-500, code "ANOMALIE_RC_ACHAT" (text-red-600), 
+   desc "RC fournisseur absent — TVA déductible rejetée"
+
+3. dot bg-orange-500, code "ANOMALIE_ART_ACHAT" (text-orange-600), 
+   desc "Article d'imposition absent — déductibilité risquée"
+
+4. dot bg-orange-500, code "ANOMALIE_ADRESSE_ACHAT" (text-orange-600), 
+   desc "Adresse fournisseur manquante"
+
+5. dot bg-yellow-500, code "ANOMALIE_MODE_PAIEMENT_VENTE" (text-yellow-700), 
+   desc "Mode de paiement non renseigné"
+
+6. dot bg-red-700, code "ANOMALIE_ESPECE_VENTE" (text-red-800), 
+   desc "Paiement espèces > 1.000.000 DA — infraction légale"
+
+Below grid: teal text link "Voir les 11 anomalies →" (13px, text-[#1A6B5E], font-medium, 
+mt-6, flex items-center gap-1, hover:gap-2 transition-all duration-200).
+
+---
+
+## SECTION 5: BILINGUAL MESSAGES (bg-[#F4F3EF])
+
+`bg-[#F4F3EF]`, pt-16 sm:pt-20 lg:pt-24, pb-16 sm:pb-20 lg:pb-24.
+Max-w-[1440px] container, px-5 sm:px-8 lg:px-12.
+
+**Badge row:** number "4", label "Relances bilingues automatiques", border-gray-300.
+
+**Heading h2:** "Relances fournisseur / en français et en arabe."
+Same clamp sizing. font-medium, leading-[1.08], mb-10 sm:mb-12.
+
+**Two mock message cards side by side (flex-col sm:flex-row, gap-4 sm:gap-6):**
+
+**Card FR:** bg-white, rounded-2xl, p-5 sm:p-6, flex-1.
+Header: flag emoji 🇫🇷 inline + "Message Français" (13px, font-semibold, text-[#1C1A16], mb-3)
+Subject line: small label "Objet:" (11px, text-gray-400) + 
+  "Facture N°2025/047 — NIF manquant" (13px, text-[#1C1A16], font-medium)
+Divider: border-t border-gray-100, my-3.
+Body text (13px, leading-[1.7], text-[#6B6966], max-w prose):
+  "Madame, Monsieur,
+  Suite à l'examen de votre facture N°2025/047, nous constatons l'absence du 
+  Numéro d'Identification Fiscale (NIF) de votre fournisseur.
+  Sans ce document, la TVA déductible de 28.500 DA sera rejetée lors de votre 
+  déclaration G50."
+Footer: "CRITIQUE" badge (10px, bg-red-50, text-red-600, border border-red-200, 
+         px-2 py-0.5, rounded, font-semibold) + "Copier" button (text-[#1A6B5E], 13px).
+
+**Card AR:** bg-[#141210], rounded-2xl, p-5 sm:p-6, flex-1.
+Header: flag emoji 🇩🇿 inline + "رسالة بالعربية" (13px, font-semibold, text-white, mb-3, 
+         dir="rtl")
+Subject line: "الموضوع:" (11px, text-gray-500, dir="rtl") + 
+  "فاتورة رقم 2025/047 — الرقم الجبائي مفقود" (13px, text-gray-200, font-medium, dir="rtl")
+Divider: border-t border-white/10, my-3.
+Body text (13px, leading-[1.9], text-gray-400, dir="rtl", text-right):
+  "السيد/السيدة،
+  بعد مراجعة الفاتورة رقم 2025/047، لاحظنا غياب الرقم الجبائي للمورد.
+  بدون هذه الوثيقة، سيتم رفض ضريبة القيمة المضافة القابلة للخصم
+  البالغة 28.500 دج عند تقديم إقرار G50."
+Footer: "عاجل" badge (10px, bg-red-900/50, text-red-400, px-2 py-0.5, rounded) + 
+         "نسخ" button (text-[#E8A020], 13px).
+
+---
+
+## SECTION 6: DEPLOYMENT & SCALE (Dark background)
+
+`bg-[#141210]`, pt-16 sm:pt-20 lg:pt-24, pb-16 sm:pb-20 lg:pb-24.
+Max-w-[1440px] container, px-5 sm:px-8 lg:px-12.
+
+**Badge row:** number "5" (teal circle), label text-gray-400, border-white/10.
+Label text: "Déploiement & mise à l'échelle"
+
+**Heading h2:** "Un serveur, 200+ comptables, / isolation totale des données."
+clamp sizing, font-medium, text-white, leading-[1.08], mb-10 sm:mb-14.
+
+**3-column stat cards (grid grid-cols-1 sm:grid-cols-3 gap-5):**
+
+Card 1 — bg-white/5, rounded-2xl, p-6, border border-white/8:
+  Big number: "15" (clamp(2.5rem,6vw,4rem), font-bold, text-white)
+  Label: "clients / KVM2" (14px, text-gray-400, mt-1)
+  Sub: "Isolation Docker par client" (12px, text-gray-600, mt-2)
+
+Card 2 — bg-[#1A6B5E]/20, rounded-2xl, p-6, border border-[#1A6B5E]/30:
+  Big number: "200+" (clamp(2.5rem,6vw,4rem), font-bold, text-[#4AA89A])
+  Label: "clients / serveur" (14px, text-gray-400, mt-1)
+  Sub: "Multi-tenant PostgreSQL" (12px, text-gray-500, mt-2) + 
+       small teal badge "V2" (10px, bg-[#1A6B5E]/30, text-[#4AA89A], px-2 py-0.5, rounded)
+
+Card 3 — bg-white/5, rounded-2xl, p-6, border border-white/8:
+  Big number: "~10€" (clamp(2.5rem,6vw,4rem), font-bold, text-white)
+  Label: "/ mois KVM2" (14px, text-gray-400, mt-1)
+  Sub: "Hostinger VPS — pas de Kubernetes" (12px, text-gray-600, mt-2)
+
+---
+
+## SECTION 7: CTA FOOTER (bg-[#1A6B5E])
+
+`bg-[#1A6B5E]`, py-16 sm:py-20 lg:py-24.
+Max-w-[1440px] container, px-5 sm:px-8 lg:px-12, text-center.
+
+Heading: "Prêt à automatiser vos déclarations G50 ?"
+clamp(1.75rem,4vw,3rem), font-medium, text-white, mb-4.
+
+Sub: "Importez votre première facture. Résultat en 30 secondes."
+(16px, text-white/70, mb-8)
+
+CTA button: bg-white, text-[#1A6B5E], rounded-full, pl-6 pr-2 py-2.5, 
+font-medium (600), 14px. Text "Demander l'accès anticipé" with text-roll hover. 
+Teal ArrowRight in teal/10 circle that rotates -45deg on hover.
+
+Small trust line below button (mt-5, text-white/50, 12px):
+"Fiscalité algérienne 2025 · IFU · IRG · IBS · TVA · G50 · Sans carte bancaire"
+
+---
+
+## GLOBAL STYLES (index.css):
+
+Standard Tailwind directives. Load General Sans. Set font-family on body.
+
+Art direction comment at top:
+/* Art direction: Algerian fiscal compliance SaaS → serious, professional, trustworthy
+   Palette: warm neutral surfaces, deep teal accent (fiscal authority), gold accent (DGI)
+   Typography: General Sans — clean, authoritative, works in FR and AR
+   Density: balanced — professional tool, not a marketing site */
+
+---
+
+## TECHNICAL DETAILS:
+
+- Framework: React 18 + TypeScript + Vite
+- Styling: Tailwind CSS 3.4
+- Packages: `shaders` (Swirl, ChromaFlow, FilmGrain, FlutedGlass from `shaders/react`), 
+  `lucide-react` (ArrowRight, Clock, Menu, X, FileUp, Cpu, CheckCircle2, FileText, 
+   Brain, Calculator, Shield, ChevronRight)
+- Font: General Sans via Fontshare (loaded in index.html)
+- Live clock: updates every second, shows Africa/Algiers timezone in HH:MM format
+- All hover animations: duration-500, ease-[cubic-bezier(0.25,0.1,0.25,1)]
+- Text-roll buttons: overflow-hidden h-[20px] flex-col container, 
+  group-hover:-translate-y-1/2, two text spans stacked vertically
+- Max content width: 1440px centered with mx-auto
+- Responsive breakpoints: default Tailwind (sm:640 md:768 lg:1024 xl:1280)
+- Arabic text sections: dir="rtl", text-right, font General Sans (supports Arabic)
+- No chat interface, no free-form inputs — buttons only
+- Arabic numerals in Arabic sections (use Eastern Arabic: ٢٠٢٥/٠٤٧ for document refs)

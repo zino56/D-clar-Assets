@@ -1,0 +1,32 @@
+---
+description: Declaration Copilot product identity, architecture, and core constraints
+alwaysApply: true
+---
+
+# Declaration Copilot — Core
+
+## Product
+AI-powered declaration-readiness SaaS for Algerian accountants. NOT a chatbot — a workflow tool for document intake, OCR, classification, structured extraction, missing-field detection, readiness scoring, anomaly review, bilingual follow-ups, and G50-aligned export.
+
+## Architecture
+- Frontend dashboard + landing page
+- Backend FastAPI app
+- Hermes integration
+- Deterministic tools and pipeline logic
+
+## Core principle: Skills reason, tools act
+- Hermes skills (reasoning only): `classify_document_type`, `extract_algerian_invoice`, `flag_missing_fields`, `draft_followup_message`
+- Deterministic tools: arithmetic, status, score, validation, OCR execution, export generation
+- Hermes callers must NOT write to DB or decide final READY/BLOCKED/INCOMPLETE status
+
+## Product constraints
+- No generic chatbot UI or free-form AI assistant as main interface
+- No Stripe/billing, analytics-heavy dashboard as primary home, WhatsApp auto-send (V1), or mobile app
+- Action-oriented for accountants
+
+## Statuses
+READY | INCOMPLETE | BLOCKED | PROCESSING | ERROR
+
+## Brand
+- Primary teal: `#1A6B5E` | Gold: `#E8A020` | Background: `#F4F3EF`
+- Dark surface: `#141210` | Text: `#1C1A16` | Muted: `#6B6966`
