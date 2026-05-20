@@ -1,5 +1,5 @@
 import { useState, useEffect, Suspense, lazy } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Clock, ArrowRight, Menu, X, ShieldCheck, FileUp, Cpu, CheckCircle2, FileText, Brain, Calculator } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FadeIn } from "../components/FadeIn";
@@ -58,6 +58,7 @@ const anomalies = [
 ];
 
 export default function LandingPage() {
+  const [, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [demoConfirmed, setDemoConfirmed] = useState(false);
   const [accessConfirmed, setAccessConfirmed] = useState(false);
@@ -161,12 +162,18 @@ export default function LandingPage() {
                   <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="text-[28px] sm:text-[32px] font-medium leading-none tracking-tight">Contact</a>
                 </div>
 
-                <Link href="/app/inbox" onClick={() => setMobileMenuOpen(false)}>
-                  <button type="button" className="w-full bg-[#1A6B5E] text-white text-[16px] font-medium rounded-full py-4 flex items-center justify-center gap-2" data-testid="btn-start-mobile">
-                    Ouvrir le dashboard
-                    <ArrowRight className="w-4 h-4" />
-                  </button>
-                </Link>
+                <button
+                  type="button"
+                  className="w-full bg-[#1A6B5E] text-white text-[16px] font-medium rounded-full py-4 flex items-center justify-center gap-2"
+                  data-testid="btn-start-mobile"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setLocation("/app/inbox");
+                  }}
+                >
+                  Commencer gratuitement
+                  <ArrowRight className="w-4 h-4" />
+                </button>
               </motion.div>
             </motion.div>
           )}
@@ -184,14 +191,17 @@ export default function LandingPage() {
               Pas un chatbot : un centre de commande pour comptables algériens. Skills IA + vérifications déterministes, traçabilité complète.
             </p>
             <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-5">
-              <Link href="/app/inbox">
-                <button type="button" className="group bg-[#1A6B5E] hover:bg-[#145549] text-white text-[13px] sm:text-[14px] font-medium rounded-full pl-5 sm:pl-6 pr-2 py-2 flex items-center gap-3 transition-colors" data-testid="btn-start-hero">
-                  <HoverRollText text="Ouvrir le dashboard" />
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center">
-                    <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1A6B5E] transition-transform duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:-rotate-45" />
-                  </div>
-                </button>
-              </Link>
+              <button
+                type="button"
+                className="group bg-[#1A6B5E] hover:bg-[#145549] text-white text-[13px] sm:text-[14px] font-medium rounded-full pl-5 sm:pl-6 pr-2 py-2 flex items-center gap-3 transition-colors"
+                data-testid="btn-start-hero"
+                onClick={() => setLocation("/app/inbox")}
+              >
+                <HoverRollText text="Commencer maintenant" />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-white rounded-full flex items-center justify-center">
+                  <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#1A6B5E] transition-transform duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:-rotate-45" />
+                </div>
+              </button>
               <div className="bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] rounded-[4px] px-3 py-2 flex items-center gap-3">
                 <ShieldCheck className="w-5 h-5 text-[#1A6B5E]" />
                 <span className="text-[13px] sm:text-[14px] font-medium">Fiscalité algérienne 2025</span>
